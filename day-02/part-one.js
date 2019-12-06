@@ -48,9 +48,3 @@ for (let ip = 0; ip < program.length && !done; ip += 4) {
 	console.log("Executing", opcode, "at", ip, "with arguments", args);
 	op.apply(null, [program, ...args]);
 }
-
-if (!done) {
-	throw new Error("Reached the end of the program without hitting a halt instruction.");
-}
-
-console.log(program[0]);
