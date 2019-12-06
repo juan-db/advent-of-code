@@ -11,13 +11,26 @@ const ops = {
 	99: () => true
 };
 
-const result = execute(
-	require("fs")
-		.readFileSync(process.argv[2], "utf8")
-		.split(",")
-		.map(x => +x)
-);
-console.log(result);
+let program = require("fs")
+	.readFileSync(process.argv[2], "utf8")
+	.split(",")
+	.map(x => +x);
+
+for (let a = 0; a <= 99; ++a) {
+	for (let b = 0; b <= 99; ++b) {
+		program[1] = a;
+		program[2] = b;
+		try {
+			result = execute(program.slice());
+		} catch (e) {
+			console.log(e.message);
+		}
+		if (result === 19690720) {
+			console.log(100 * a + b);
+			process.exit(0);
+		}
+	}
+}
 
 function mathOp(op) {
 	return function (memory, a, b, dst) {
