@@ -1,4 +1,4 @@
-// Why do I always overengineer *everything*?
+#!/usr/bin/node
 
 if (process.argv.length != 3) {
 	console.log("Usage: node solution.js <program file>");
