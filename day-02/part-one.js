@@ -37,7 +37,7 @@ const ops = {
 	}
 };
 
-for (let ip = 0; ip < program.length && !done; ip += 4) {
+for (let ip = 0; ip < program.length; ip += 4) {
 	const opcode = program[ip];
 	const op = ops[opcode];
 	if (!op) {
@@ -45,6 +45,5 @@ for (let ip = 0; ip < program.length && !done; ip += 4) {
 	}
 
 	let args = program.slice(ip + 1, ip + 4);
-	console.log("Executing", opcode, "at", ip, "with arguments", args);
 	op.apply(null, [program, ...args]);
 }
