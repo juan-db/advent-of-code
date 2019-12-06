@@ -18,11 +18,12 @@ let done = false;
 function mathOp(op) {
 	return function (p, a, b, dst) {
 		const args = [...arguments];
+
 		if (args.length < 4) {
-			throw new Error(`Expected three (3) arguments (two (2) operands and a destination) but only received ${args.length - 1}: ${[...args].slice(1).join(", ")}`);
+			throw new Error(`Expected three (3) arguments (two (2) operands and a destination) but only received ${args.length - 1}: ${args.slice(1).join(", ")}`);
 		}
 
-		for (const [i, v] of [...args].slice(1).entries()) {
+		for (const [i, v] of args.slice(1).entries()) {
 			if (v < 0 || v >= program.length) {
 				throw new Error(`Invalid position provided as ${["first", "second", "third"][i]} operand to operation: ${v}`);
 			}
