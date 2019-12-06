@@ -10,11 +10,6 @@ const program = require("fs")
 	.split(",")
 	.map(x => +x);
 
-/** Instruction pointer */
-let ip = 0;
-
-let done = false;
-
 function mathOp(op) {
 	return function (p, a, b, dst) {
 		const args = [...arguments];
@@ -30,18 +25,19 @@ function mathOp(op) {
 		}
 
 		p[dst] = op(p[a], p[b]);
-
-		ip += 4;
 	}
 }
 
 const ops = {
 	1: mathOp((a, b) => a + b),
 	2: mathOp((a, b) => a * b),
-	99: () => done = true
+	99: () => {
+		console.log(program[0]);
+		process.exit(0);
+	}
 };
 
-while (ip < program.length && !done) {
+for (let ip = 0; ip < program.length && !done; ip += 4) {
 	const opcode = program[ip];
 	const op = ops[opcode];
 	if (!op) {
