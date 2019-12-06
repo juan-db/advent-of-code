@@ -20,11 +20,7 @@ for (let a = 0; a <= 99; ++a) {
 	for (let b = 0; b <= 99; ++b) {
 		program[1] = a;
 		program[2] = b;
-		try {
-			result = execute(program.slice());
-		} catch (e) {
-			console.log(e.message);
-		}
+		result = execute(program.slice());
 		if (result === 19690720) {
 			console.log(100 * a + b);
 			process.exit(0);
