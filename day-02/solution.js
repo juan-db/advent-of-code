@@ -56,4 +56,4 @@ if (!done) {
 	throw new Error("Reached the end of the program without hitting a halt instruction.");
 }
 
-console.log(program);
+console.log(program[0]);
