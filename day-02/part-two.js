@@ -18,10 +18,8 @@ let program = require("fs")
 
 for (let a = 0; a <= 99; ++a) {
 	for (let b = 0; b <= 99; ++b) {
-		program[1] = a;
-		program[2] = b;
-		result = execute(program.slice());
-		if (result === 19690720) {
+		const p = [program[0], a, b, ...program.slice(3)];
+		if (execute(p) === 19690720) {
 			console.log(100 * a + b);
 			process.exit(0);
 		}
