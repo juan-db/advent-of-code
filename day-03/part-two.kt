@@ -124,7 +124,7 @@ fun main(args: Array<String>) {
 	// think of.
 	var fewestSteps = Int.MAX_VALUE
 	var aDistance = 0
-	aLoop@ for (a in generateLines(program[0])) {
+	for (a in generateLines(program[0])) {
 		var bDistance = 0
 		for (b in generateLines(program[1])) {
 			val intersection = a.intersection(b)
@@ -145,10 +145,11 @@ fun main(args: Array<String>) {
 				if (distance < fewestSteps) {
 					fewestSteps = distance
 				}
-				continue@aLoop
+				break
 			}
 			bDistance += b.length
 		}
 		aDistance += a.length
 	}
+	println(fewestSteps)
 }
