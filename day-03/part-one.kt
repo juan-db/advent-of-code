@@ -94,7 +94,7 @@ fun main(args: Array<String>) {
 		return
 	}
 
-	// TODO: I want to try to do with "functionally" once I solve it. I think it
+	// TODO: I want to try a "functional" approach once it's done.
 	// might use quite a bit more memory.
 	val program = File(args[0])
 		.readLines()
