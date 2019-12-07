@@ -4,7 +4,11 @@ import java.io.File
 // to line, then recalculate direction. I don't really want to do invest the
 // time to fix it right now.
 
-data class Point(val x: Int, val y: Int)
+data class Point(val x: Int, val y: Int) {
+	companion object {
+		val ORIGIN = Point(1, 1)
+	}
+}
 
 data class Line(val a: Point, val b: Point) {
 	enum class Direction {
@@ -93,15 +97,14 @@ fun main(args: Array<String>) {
 	val program = File(args[0])
 		.readLines()
 		.map { it.split(",") }
+
 	val intersections = mutableListOf<Point>()
-	var a = Point(0, 0)
+	var a = Point.ORIGIN.copy()
 	for (aInstruction in program[0]) {
 		val aLine = Line(a, findNextCoordinate(a, aInstruction))
-		println("a line: $aLine")
-		var b = Point(0, 0)
+		var b = Point.ORIGIN.copy()
 		for (bInstruction in program[1]) {
 			val bLine = Line(b, findNextCoordinate(b, bInstruction))
-			println("b line: $bLine")
 			val intersection = aLine.intersection(bLine)
 			if (intersection != null) {
 				intersections.add(intersection)
