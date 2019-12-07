@@ -1,4 +1,5 @@
 import java.io.File
+import kotlin.math.abs
 
 // I know it's dumb that I convert from instruction of form <direction><count>,
 // to line, then recalculate direction. I don't really want to do invest the
@@ -6,8 +7,10 @@ import java.io.File
 
 data class Point(val x: Int, val y: Int) {
 	companion object {
-		val ORIGIN = Point(1, 1)
+		val ORIGIN = Point(0, 0)
 	}
+
+	fun distance(other: Point) = abs(x - other.x) + abs(y - other.y)
 }
 
 data class Line(val a: Point, val b: Point) {
@@ -118,7 +121,12 @@ fun main(args: Array<String>) {
 	println(
 		intersections
 			.filterNot { it == Point.ORIGIN }
-			.map { it.x + it.y }
+			.map {
+				println(it)
+				Point.ORIGIN.distance(it).let {
+					println(it)
+					it
+				} }
 			.min()
 	)
 }
