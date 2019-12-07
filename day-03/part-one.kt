@@ -56,7 +56,7 @@ data class Line(val a: Point, val b: Point) {
 			// Horizontal line starts before and ends after the vertical line.
 			a.a.x <= b.a.x && a.b.x >= b.a.x
 			// Horizontal line is in between the start and end y of the vertical line.
-			&& a.a.y >= b.a.y && a.a.y <= b.a.y
+			&& a.a.y >= b.a.y && a.a.y <= b.b.y
 		) {
 			Point(a.a.x, b.a.y)
 		} else {
@@ -94,6 +94,8 @@ fun main(args: Array<String>) {
 		return
 	}
 
+	// TODO: I want to try to do with "functionally" once I solve it. I think it
+	// might use quite a bit more memory.
 	val program = File(args[0])
 		.readLines()
 		.map { it.split(",") }
@@ -113,5 +115,10 @@ fun main(args: Array<String>) {
 		}
 		a = aLine.b
 	}
-	println(intersections)
+	println(
+		intersections
+			.filterNot { it == Point.ORIGIN }
+			.map { it.x + it.y }
+			.min()
+	)
 }
