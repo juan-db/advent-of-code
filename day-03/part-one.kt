@@ -21,9 +21,9 @@ data class Line(val a: Point, val b: Point) {
 
 	private val direction =
 		if (a.x == b.x) {
-			if (a.y < b.y) Direction.RIGHT else Direction.LEFT
+			if (a.y < b.y) Direction.UP else Direction.DOWN
 		} else {
-			if (a.x < b.x) Direction.UP else Direction.DOWN
+			if (a.x < b.x) Direction.RIGHT else Direction.LEFT
 		}
 
 	private val simpleDirection =
@@ -45,7 +45,7 @@ data class Line(val a: Point, val b: Point) {
 			val x = this.normalize()
 			val y = other.normalize()
 
-			if ((x.simpleDirection) == SimpleDirection.VERTICAL) {
+			if (x.simpleDirection == SimpleDirection.HORIZONTAL) {
 				Pair(x, y)
 			} else {
 				Pair(y, x)
