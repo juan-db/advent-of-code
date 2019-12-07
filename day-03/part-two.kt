@@ -1,5 +1,6 @@
 import java.io.File
 import kotlin.math.abs
+import kotlin.math.min
 
 // I know it's dumb that I convert from instruction of form <direction><count>,
 // to line, then recalculate direction. I don't really want to do invest the
@@ -10,7 +11,7 @@ data class Point(val x: Int, val y: Int) {
 		val ORIGIN = Point(0, 0)
 	}
 
-	fun distance(other: Point) = abs(x - other.x) + abs(y - other.y)
+	fun dist(other: Point) = abs(x - other.x) + abs(y - other.y)
 }
 
 data class Line(val a: Point, val b: Point) {
@@ -123,33 +124,21 @@ fun main(args: Array<String>) {
 	// This is not the optimal way of doing this but it's the simplest I can
 	// think of.
 	var fewestSteps = Int.MAX_VALUE
-	var aDistance = 0
+	var aDist = 0
 	for (a in generateLines(program[0])) {
-		var bDistance = 0
+		var bDist = 0
 		for (b in generateLines(program[1])) {
-			val intersection = a.intersection(b)
-			if (intersection != null && intersection != Point.ORIGIN) {
-				val distance = aDistance + bDistance +
-					intersection.distance(
-						when (a.direction) {
-							Line.Direction.UP, Line.Direction.RIGHT -> a.a
-							Line.Direction.DOWN, Line.Direction.LEFT -> a.b
-						}
-					) +
-					intersection.distance(
-						when (b.direction) {
-							Line.Direction.UP, Line.Direction.RIGHT -> b.a
-							Line.Direction.DOWN, Line.Direction.LEFT -> b.b
-						}
-					)
-				if (distance < fewestSteps) {
-					fewestSteps = distance
-				}
+			val inters = a.intersection(b)
+			if (inters != null && inters != Point.ORIGIN) {
+				fewestSteps = min(
+					fewestSteps,
+					aDist + bDist + inters.dist(a.a) + inters.dist(b.a)
+				)
 				break
 			}
-			bDistance += b.length
+			bDist += b.length
 		}
-		aDistance += a.length
+		aDist += a.length
 	}
 	println(fewestSteps)
 }
