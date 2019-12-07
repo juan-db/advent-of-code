@@ -121,12 +121,7 @@ fun main(args: Array<String>) {
 	println(
 		intersections
 			.filterNot { it == Point.ORIGIN }
-			.map {
-				println(it)
-				Point.ORIGIN.distance(it).let {
-					println(it)
-					it
-				} }
+			.map { Point.ORIGIN.distance(it) }
 			.min()
 	)
 }
