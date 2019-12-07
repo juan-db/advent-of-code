@@ -81,7 +81,7 @@ data class Line(val a: Point, val b: Point) {
 	}
 }
 
-fun findNextCoordinate(original: Point, instruction: String): Point =
+fun getNextCoordinate(original: Point, instruction: String): Point =
 	when (instruction[0]) {
 		// There HAS to be a better way to do this
 		'R' -> Point(original.x + instruction.substring(1).toInt(), original.y)
@@ -91,37 +91,41 @@ fun findNextCoordinate(original: Point, instruction: String): Point =
 		else -> throw Exception("Unrecognized direction: ${instruction[0]}")
 	}
 
+fun generatePoints(instructions: List<String>) = sequence {
+	var last = Point.ORIGIN.copy()
+	yield(last)
+
+	for (instruction in instructions) {
+		last = getNextCoordinate(last, instruction)
+		yield(last)
+	}
+}
+
 fun main(args: Array<String>) {
 	if (args.size != 1) {
 		println("Usage: ./part-one <filename>")
 		return
 	}
 
-	// TODO: I want to try a "functional" approach once it's done.
-	// might use quite a bit more memory.
 	val program = File(args[0])
 		.readLines()
 		.map { it.split(",") }
 
-	val intersections = mutableListOf<Point>()
-	var a = Point.ORIGIN.copy()
-	for (aInstruction in program[0]) {
-		val aLine = Line(a, findNextCoordinate(a, aInstruction))
-		var b = Point.ORIGIN.copy()
-		for (bInstruction in program[1]) {
-			val bLine = Line(b, findNextCoordinate(b, bInstruction))
-			val intersection = aLine.intersection(bLine)
-			if (intersection != null) {
-				intersections.add(intersection)
+	val bLines = generatePoints(program[1])
+		.zipWithNext()
+		.map { Line(it.first, it.second) }
+	generatePoints(program[0])
+		.zipWithNext()
+		.map { Line(it.first, it.second) }
+		.flatMap { a ->
+			bLines.map { b ->
+				Pair(a, b)
 			}
-			b = bLine.b
 		}
-		a = aLine.b
-	}
-	println(
-		intersections
-			.filterNot { it == Point.ORIGIN }
-			.map { Point.ORIGIN.distance(it) }
-			.min()
-	)
+		.map { it.first.intersection(it.second) }
+		.filterNotNull()
+		.filterNot { it == Point.ORIGIN }
+		.map { Point.ORIGIN.distance(it) }
+		.min()
+		.let(::println)
 }
