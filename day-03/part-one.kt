@@ -61,7 +61,7 @@ data class Line(val a: Point, val b: Point) {
 			// Horizontal line is in between the start and end y of the vertical line.
 			&& a.a.y >= b.a.y && a.a.y <= b.b.y
 		) {
-			Point(a.a.x, b.a.y)
+			Point(b.a.x, a.a.y)
 		} else {
 			null
 		}
