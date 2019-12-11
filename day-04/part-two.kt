@@ -1,0 +1,1 @@
+fun main() = println(java.io.File("input").readText().trim().split("-").map { it.toInt() }.let { it[0]..it[1] }.asSequence().map { it.toString().toList() }.filter { it == it.sorted() }.map { it.groupBy { it } }.filter { it.values.any { it.size == 2 } }.count())
