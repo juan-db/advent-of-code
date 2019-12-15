@@ -56,6 +56,34 @@ data class Instruction(
 			println(args[0].value)
 			false
 		}),
+		JUMP_IF_TRUE(5, 2, { program, args ->
+			if (args[0].value != 0) {
+				program.ip = args[1].value
+			}
+			false
+		}),
+		JUMP_IF_FALSE(6, 2, { program, args ->
+			if (args[0].value == 0) {
+				program.ip = args[1].value
+			}
+			false
+		}),
+		LESS_THAN(7, 3, { program, args ->
+			if (args[2].mode != Parameter.Mode.POSITION) {
+				throw InvalidArgumentMode("Third argument to less than must be positional.")
+			}
+
+			program[args[2].position as Int] = if (args[0].value < args[1].value) 1 else 0
+			false
+		}),
+		EQUAL(8, 3, { program, args ->
+			if (args[2].mode != Parameter.Mode.POSITION) {
+				throw InvalidArgumentMode("Third argument to equal must be positional.")
+			}
+
+			program[args[2].position as Int] = if (args[0].value == args[1].value) 1 else 0
+			false
+		}),
 		HALT(99, 0, { _, _ -> true });
 
 		operator fun invoke(program: Program, args: List<Parameter>) = op(program, args)
@@ -118,7 +146,7 @@ data class Instruction(
 class InvalidArgumentMode(message: String) : Exception(message)
 
 class Program(collection: Collection<Int>) : ArrayList<Int>(collection) {
-	private var ip = 0
+	var ip = 0
 
 	fun poll(): Int = this[ip++]
 }
