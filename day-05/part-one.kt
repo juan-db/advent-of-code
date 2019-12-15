@@ -20,26 +20,25 @@ data class Instruction(
 		val opcode: Int, val argCount: Int, val op: InstructionFunction
 	) {
 		ADD(1, 3, { program, args ->
-			if (args[0].mode != Parameter.Mode.POSITION) {
-				throw InvalidArgumentMode("First argument to ADD must be a position argument.")
+			if (args[2].mode != Parameter.Mode.POSITION) {
+				throw InvalidArgumentMode("Last argument to ADD must be a position argument.")
 			}
 
-			program[args[0].value] = args[1].value + args[2].value
-			true
+			program[args[2].position as Int] = args[0].value + args[1].value
+			false
 		}),
 		MUL(2, 3, { program, args ->
-			if (args[0].mode != Parameter.Mode.POSITION) {
-				throw InvalidArgumentMode("First argument to MUL must be a position argument.")
+			if (args[2].mode != Parameter.Mode.POSITION) {
+				throw InvalidArgumentMode("Last argument to MUL must be a position argument.")
 			}
 
-			program[args[0].value] = args[1].value * args[2].value
-			true
+			program[args[2].position as Int] = args[0].value * args[1].value
+			false
 		}),
 		READ(3, 1, { program, args ->
 			if (args[0].mode != Parameter.Mode.POSITION) {
 				throw InvalidArgumentMode("Only position argument mode is accepted for the READ instruction.")
 			}
-
 
 			var num: Int? = null
 			while (num == null) {
@@ -50,18 +49,12 @@ data class Instruction(
 					println("That is not a valid number!")
 				}
 			}
-			program[args[0].value] = num as Int
-			true
+			program[args[0].position as Int] = num as Int
+			false
 		}),
-		PRINT(4, 1, { program, args ->
-			// Yes, it is useless to pass an immediate value to print, but why
-			// not?
-			// if (args[0].mode != Parameter.Mode.POSITION) {
-			//  throw InvalidArgumentMode("Only position argument mode is accepted for the PRINT instruction.")
-			// }
-
-			println(program[args[0].value])
-			true
+		PRINT(4, 1, { _, args ->
+			println(args[0].value)
+			false
 		}),
 		HALT(99, 0, { _, _ -> true });
 
@@ -75,15 +68,19 @@ data class Instruction(
 	companion object Companion {
 		fun parse(code: Int): Instruction {
 			val instruction = KnownInstruction[code % 100]
-			val explicitModes = (code / 100)
-				.toString()
-				.chunked(1)
-				.map { Parameter.Mode.values()[it.toInt()] }
-				.toTypedArray()
-			val paddingModes = List(
+			val explicitModes: Array<Parameter.Mode> = (code / 100)
+				.takeIf { it > 0 }
+				?.toString()
+				?.chunked(1)
+				?.map { Parameter.Mode.values()[it.toInt()] }
+				?.toTypedArray() ?: arrayOf()
+			val paddingModes = Array(
 				instruction.argCount - explicitModes.size
 			) { Parameter.Mode.values()[0] }
-			return Instruction(instruction, explicitModes + paddingModes)
+
+			return Instruction(
+				instruction, explicitModes.reversedArray() + paddingModes
+			)
 		}
 	}
 
@@ -146,56 +143,3 @@ fun main(args: Array<String>) {
 		val done = instruction(program)
 	} while (!done)
 }
-
-
-//const ops = {
-//	1: mathOp((a, b) => a + b),
-//	2: mathOp((a, b) => a * b),
-//	99: () => true
-//};
-//
-//for (let a = 0; a <= 99; ++a) {
-//	for (let b = 0; b <= 99; ++b) {
-//		const p = [program[0], a, b, ...program.slice(3)];
-//		if (execute(p) === 19690720) {
-//			console.log(100 * a + b);
-//			process.exit(0);
-//		}
-//	}
-//}
-//
-//function mathOp(op) {
-//	return function (memory, a, b, dst) {
-//		const args = [...arguments];
-//
-//		if (args.length < 4) {
-//			throw new Error(`Expected three (3) arguments (two (2) operands and a destination) but only received ${args.length - 1}: ${args.slice(1).join(", ")}`);
-//		}
-//
-//		for (const [i, v] of args.slice(1).entries()) {
-//		if (v < 0 || v >= memory.length) {
-//			throw new Error(`Invalid address provided as ${["first", "second", "third"][i]} argument to instruction: ${v}`);
-//		}
-//	}
-//
-//		memory[dst] = op(memory[a], memory[b]);
-//	}
-//}
-//
-//function execute(memory) {
-//	for (let ip = 0; ip < memory.length; ip += 4) {
-//		const opcode = memory[ip];
-//		const op = ops[opcode];
-//		if (!op) {
-//			throw new Error(`Unrecognized opcode: ${opcode}`);
-//		}
-//
-//		const args = memory.slice(ip + 1, ip + 4);
-//		const done = op.apply(null, [memory, ...args]);
-//		if (done) {
-//			return memory[0];
-//		}
-//	}
-//
-//	throw new Error("No halt instruction in code.");
-//}
