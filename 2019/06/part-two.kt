@@ -11,48 +11,26 @@ import kotlin.system.exitProcess
 class SpaceObject(
 	val name: String, var orbit: SpaceObject?, val orbits: MutableList<SpaceObject>
 ) {
-	fun distanceToCore(): Int {
-		var obj = orbit
-		var total = 0
-		while (obj != null) {
-			total += 1
-			obj = obj.orbit
-		}
-		return total
-	}
-
-	fun printTree(depth: Int = 0, printIndent: Boolean = false) {
-		if (printIndent) {
-			print(" ".repeat(depth))
-		}
-		if (depth != 0) {
-			print(" - ")
+	fun find(name: String): SpaceObject? =
+		if (this.name == name) {
+			this
+		} else {
+			orbits
+				.asSequence()
+				.map { it.find(name) }
+				.firstOrNull { it != null }
 		}
 
-		print(name)
-		for (i in 0 until orbits.size) {
-			val child = orbits[i]
-			val newDepth = (if (depth != 0) 3 else 0) + depth + name.length
-			if (i != 0) {
-				println()
-				child.printTree(newDepth, true)
-			} else {
-				child.printTree(newDepth)
-			}
+	fun distance(name: String): Int? =
+		if (this.name == name) {
+			0
+		} else {
+			orbits
+				.asSequence()
+				.map { it.distance(name) }
+				.firstOrNull { it != null }
+				?.plus(1)
 		}
-	}
-
-	fun find(name: String): SpaceObject? {
-		val orbits = mutableListOf(this)
-		while (orbits.size > 0) {
-			val current: SpaceObject = orbits.removeAt(0)
-			if (current.name == name) {
-				return current
-			}
-			orbits.addAll(current.orbits)
-		}
-		return null
-	}
 }
 
 fun createObjects(map: Iterable<String>): Map<String, SpaceObject> {
@@ -63,10 +41,27 @@ fun createObjects(map: Iterable<String>): Map<String, SpaceObject> {
 	return objects
 }
 
+fun constructOrbits(map: List<List<String>>, objects: Map<String, SpaceObject>) {
+	for (orbit in map) {
+		// Not sure why `?: error` is preferred to `!!` but ok IDEA.
+		val orbitee = objects[orbit[0]] ?: error("")
+		val orbiter = objects[orbit[1]] ?: error("")
+		orbitee.orbits.add(orbiter)
+		orbiter.orbit = orbitee
+	}
+}
+
 fun findDistance(root: SpaceObject): Int {
 	val you = root.find("YOU") ?: error("Couldn't find YOU.")
-	val santa = root.find("SAN") ?: error("Couldn't find SAN.")
-
+	var current = you.orbit
+	while (current != null) {
+		val distance = current.distance("SAN")
+		if (distance != null) {
+			return distance + current.distance("YOU")!! - 2
+		}
+		current = current.orbit
+	}
+	error("Couldn't find SAN.")
 }
 
 fun main(args: Array<String>) {
@@ -77,14 +72,7 @@ fun main(args: Array<String>) {
 
 	val map = File(args[0]).readLines().map { it.split(')') }
 	val objects = createObjects(map.flatten())
-	for (orbit in map) {
-		// Not sure why `?: error` is preferred to `!!` but ok IDEA.
-		val orbitee = objects[orbit[0]] ?: error("")
-		val orbiter = objects[orbit[1]] ?: error("")
-		orbitee.orbits.add(orbiter)
-		orbiter.orbit = orbitee
-	}
-
-	val orbits = objects.values.sumBy { it.distanceToCore() }
-	println(orbits)
+	constructOrbits(map, objects)
+	val root = objects.values.first { it.orbit == null }
+	println(findDistance(root))
 }
