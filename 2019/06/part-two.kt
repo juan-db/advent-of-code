@@ -41,6 +41,18 @@ class SpaceObject(
 			}
 		}
 	}
+
+	fun find(name: String): SpaceObject? {
+		val orbits = mutableListOf(this)
+		while (orbits.size > 0) {
+			val current: SpaceObject = orbits.removeAt(0)
+			if (current.name == name) {
+				return current
+			}
+			orbits.addAll(current.orbits)
+		}
+		return null
+	}
 }
 
 fun createObjects(map: Iterable<String>): Map<String, SpaceObject> {
@@ -49,6 +61,12 @@ fun createObjects(map: Iterable<String>): Map<String, SpaceObject> {
 		objects.computeIfAbsent(obj) { SpaceObject(it, null, mutableListOf()) }
 	}
 	return objects
+}
+
+fun findDistance(root: SpaceObject): Int {
+	val you = root.find("YOU") ?: error("Couldn't find YOU.")
+	val santa = root.find("SAN") ?: error("Couldn't find SAN.")
+
 }
 
 fun main(args: Array<String>) {
