@@ -1,4 +1,5 @@
 import java.io.File
+import java.lang.Exception
 import kotlin.system.exitProcess
 
 /**
@@ -7,7 +8,7 @@ import kotlin.system.exitProcess
  * @property orbits Objects orbiting around this object.
  */
 class SpaceObject(
-	val name: String, val orbit: SpaceObject?, val orbits: MutableList<SpaceObject>
+	val name: String, var orbit: SpaceObject?, val orbits: MutableList<SpaceObject>
 ) {
 	fun distanceToCore(): Int {
 		var obj = orbit
@@ -41,6 +42,14 @@ class SpaceObject(
 	}
 }
 
+fun createObjects(map: Iterable<String>): Map<String, SpaceObject> {
+	val objects = mutableMapOf<String, SpaceObject>()
+	for (obj in map) {
+		objects.computeIfAbsent(obj) { SpaceObject(it, null, mutableListOf()) }
+	}
+	return objects
+}
+
 fun main(args: Array<String>) {
 	if (args.size != 1) {
 		println("Usage: java -jar part-one.jar <program file>")
@@ -48,16 +57,15 @@ fun main(args: Array<String>) {
 	}
 
 	val map = File(args[0]).readLines().map { it.split(')') }
-
-	val com = SpaceObject("COM", null, mutableListOf())
-	val objects = mutableMapOf(com.name to com)
+	val objects = createObjects(map.flatten())
 	for (orbit in map) {
-		val orbitee = objects[orbit[0]] ?: com
-		val obj = SpaceObject(orbit[1], orbitee, mutableListOf())
-		orbitee.orbits.add(obj)
-		objects[orbit[1]] = obj
+		// Not sure why `?: error` is preferred to `!!` but ok IDEA.
+		val orbitee = objects[orbit[0]] ?: error("")
+		val orbiter = objects[orbit[1]] ?: error("")
+		orbitee.orbits.add(orbiter)
+		orbiter.orbit = orbitee
 	}
-	com.printTree()
-	println()
-	println(objects.values.fold(0) { acc, obj -> acc + obj.distanceToCore() })
+
+	val orbits = objects.values.sumBy { it.distanceToCore() }
+	println(orbits)
 }
