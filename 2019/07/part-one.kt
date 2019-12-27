@@ -1,6 +1,8 @@
-package parttwo
+package partone
 
 import java.io.File
+import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.system.exitProcess
 
 data class Parameter(val mode: Mode, val value: Int, val position: Int?) {
@@ -42,20 +44,20 @@ data class Instruction(
 				throw InvalidArgumentMode("Only position argument mode is accepted for the READ instruction.")
 			}
 
-			var num: Int? = null
-			while (num == null) {
-				try {
-					print("Please enter a number: ")
-					num = readLine()?.toInt()
-				} catch (e: java.lang.NumberFormatException) {
-					println("That is not a valid number!")
+			program[args[0].position as Int] =
+				if (program.input.size > 0) {
+					program.input.poll()
+				} else {
+					var tmp: Int?
+					do {
+						tmp = readLine()?.toIntOrNull()
+					} while (tmp == null)
+					tmp as Int
 				}
-			}
-			program[args[0].position as Int] = num as Int
 			false
 		}),
-		PRINT(4, 1, { _, args ->
-			println(args[0].value)
+		PRINT(4, 1, { program, args ->
+			program.output.push(args[0].value)
 			false
 		}),
 		JUMP_IF_TRUE(5, 2, { program, args ->
@@ -150,6 +152,9 @@ class InvalidArgumentMode(message: String) : Exception(message)
 class Program(collection: Collection<Int>) : ArrayList<Int>(collection) {
 	var ip = 0
 
+	val input = LinkedList<Int>()
+	val output = LinkedList<Int>()
+
 	fun poll(): Int = this[ip++]
 }
 
@@ -168,8 +173,22 @@ fun main(args: Array<String>) {
 		.map { it.toInt() }
 		.toProgram()
 
+	var last: Program? = null
+	for (i in arrayOf(0, 1, 2, 3, 4)) {
+		val current = Program(program)
+		current.input.push(i)
+		current.input.push(last?.output?.firstOrNull() ?: 0)
+		execute(current)
+		last = current
+	}
+	println(last!!.output.poll())
+}
+
+fun execute(program: Program) {
+	println("Executing $program with inputs ${program.input}")
 	do {
 		val instruction = Instruction.parse(program.poll())
 		val done = instruction(program)
 	} while (!done)
+	println("Outputs ${program.output}")
 }
