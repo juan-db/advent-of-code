@@ -50,7 +50,7 @@ data class Instruction(
 				} else {
 					var tmp: Int?
 					do {
-						tmp = readLine()?.toIntOrNull()
+						tmp = readLine()!!.toIntOrNull()
 					} while (tmp == null)
 					tmp as Int
 				}
@@ -160,6 +160,39 @@ class Program(collection: Collection<Int>) : ArrayList<Int>(collection) {
 
 fun List<Int>.toProgram(): Program = Program(this)
 
+fun Array<Int>.permutations(): Sequence<Array<Int>> = sequence {
+	fun Array<Int>.swap(aIndex: Int, bIndex: Int) {
+		val tmp = this[aIndex]
+		this[aIndex] = this[bIndex]
+		this[bIndex] = tmp
+	}
+
+	// Blatantly stolen from RosettaCode
+	val array = this@permutations
+	val c = Array(array.size) { 0 }
+	var plus = false
+
+	yield(array)
+
+	var i = 0
+	while (i < array.size) {
+		if (c[i] < i) {
+			if (i % 2 == 0) {
+				array.swap(0, i)
+			} else {
+				array.swap(c[i], i)
+			}
+			yield(array)
+			plus = !plus
+			c[i] += 1
+			i = 0
+		} else {
+			c[i] = 0
+			i += 1
+		}
+	}
+}
+
 fun main(args: Array<String>) {
 	if (args.size != 1) {
 		println("Usage: java -jar part-one.jar <program file>")
@@ -173,22 +206,29 @@ fun main(args: Array<String>) {
 		.map { it.toInt() }
 		.toProgram()
 
-	var last: Program? = null
-	for (i in arrayOf(0, 1, 2, 3, 4)) {
-		val current = Program(program)
-		current.input.push(i)
-		current.input.push(last?.output?.firstOrNull() ?: 0)
-		execute(current)
-		last = current
-	}
-	println(last!!.output.poll())
+
+	arrayOf(0, 1, 2, 3, 4)
+		.permutations()
+		.map {
+			var lastOutput: Int? = null
+			for (i in it) {
+				val current = Program(program)
+				current.input.add(i)
+				current.input.add(lastOutput ?: 0)
+				execute(current)
+				lastOutput = current.output.last()
+			}
+			lastOutput!! to it.clone()
+		}
+		.maxBy { it.first }!!
+		.let {
+			println("${it.first} [${it.second.contentToString()}")
+		}
 }
 
 fun execute(program: Program) {
-	println("Executing $program with inputs ${program.input}")
 	do {
 		val instruction = Instruction.parse(program.poll())
 		val done = instruction(program)
 	} while (!done)
-	println("Outputs ${program.output}")
 }
