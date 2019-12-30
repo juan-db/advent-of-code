@@ -1,6 +1,7 @@
 package parttwo
 
 import java.io.File
+import java.lang.Integer.max
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.system.exitProcess
@@ -245,6 +246,7 @@ fun amplify(originalProgram: Program, phaseSettings: Array<Int>): Int {
 	programs[0].input.push(0)
 
 	var i = 0
+	var largestOutput = 0
 	while (programs.any { it.state != Program.State.HALTED }) {
 		val program = programs[i]
 		val previous = programs[(i - 1).let { if (it >= 0) it else 4 }]
@@ -253,7 +255,8 @@ fun amplify(originalProgram: Program, phaseSettings: Array<Int>): Int {
 		}
 		program.execute()
 		i = (i + 1).let { if (it < programs.size) it else 0 }
+		largestOutput = max(largestOutput, programs.last().output.max() ?: 0)
 	}
 
-	return programs.first { it.output.size > 0 }.output.poll()
+	return largestOutput
 }
