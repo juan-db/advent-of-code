@@ -174,6 +174,7 @@ class Program(collection: Collection<Int>) : ArrayList<Int>(collection) {
 				return
 			}
 			val done = instruction!!(this)
+			instruction = null
 		} while (!done)
 		state = State.HALTED
 	}
@@ -231,7 +232,7 @@ fun main(args: Array<String>) {
 		.permutations()
 		.map { amplify(program, it) to it.clone() }
 		.maxBy { it.first }!!
-		.let { println("${it.first} with [${it.second.contentToString()}") }
+		.let { println("${it.first} with ${it.second.contentToString()}") }
 }
 
 fun amplify(originalProgram: Program, phaseSettings: Array<Int>): Int {
@@ -241,24 +242,17 @@ fun amplify(originalProgram: Program, phaseSettings: Array<Int>): Int {
 				it.input.add(phaseSetting)
 			}
 		}
+	programs[0].input.push(0)
 
-	while (true) {
-		val index = programs.indexOfFirst {
-			it.state != Program.State.HALTED && it.state != Program.State.WAITING_FOR_INPUT
-		}
-		if (index == -1) {
-			break
-		}
-
-		val previousIndex = (index - 1).let { if (it >= 0) it else 4 }
-
-		val program = programs[index]
-		val previous = programs[previousIndex]
+	var i = 0
+	while (programs.any { it.state != Program.State.HALTED }) {
+		val program = programs[i]
+		val previous = programs[(i - 1).let { if (it >= 0) it else 4 }]
 		while (previous.output.size > 0) {
 			program.input.add(previous.output.poll())
 		}
-
 		program.execute()
+		i = (i + 1).let { if (it < programs.size) it else 0 }
 	}
 
 	return programs.first { it.output.size > 0 }.output.poll()
