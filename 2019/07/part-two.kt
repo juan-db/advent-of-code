@@ -141,12 +141,42 @@ data class Instruction(
 class InvalidArgumentMode(message: String) : Exception(message)
 
 class Program(collection: Collection<Int>) : ArrayList<Int>(collection) {
+	enum class State {
+		INITIALIZED,
+		RUNNING,
+		WAITING_FOR_INPUT,
+		HALTED
+	}
+
 	var ip = 0
 
 	val input = LinkedList<Int>()
 	val output = LinkedList<Int>()
 
+	private var instruction: Instruction? = null
+
+	var state: State = State.INITIALIZED
+		private set
+
 	fun poll(): Int = this[ip++]
+
+	fun execute() {
+		state = State.RUNNING
+		do {
+			if (instruction == null) {
+				instruction = Instruction.parse(poll())
+			}
+			if (
+				instruction!!.instruction == Instruction.KnownInstruction.READ
+				&& input.size < 1
+			) {
+				state = State.WAITING_FOR_INPUT
+				return
+			}
+			val done = instruction!!(this)
+		} while (!done)
+		state = State.HALTED
+	}
 }
 
 fun List<Int>.toProgram(): Program = Program(this)
@@ -158,7 +188,7 @@ fun Array<Int>.permutations(): Sequence<Array<Int>> = sequence {
 		this[bIndex] = tmp
 	}
 
-	// Blatantly stolen from RosettaCode
+	// Shamelessly stolen from RosettaCode
 	val array = this@permutations
 	val c = Array(array.size) { 0 }
 	var plus = false
@@ -167,7 +197,6 @@ fun Array<Int>.permutations(): Sequence<Array<Int>> = sequence {
 
 	var i = 0
 	while (i < array.size) {
-		println("i: |$i|\t plus: |$plus|\t c: |${c.contentToString()}|\t a: |${array.contentToString()}|")
 		if (c[i] < i) {
 			array.swap(
 				if (i % 2 == 0) 0 else c[i],
@@ -198,28 +227,39 @@ fun main(args: Array<String>) {
 		.toProgram()
 
 
-	arrayOf(0, 1, 2, 3, 4)
+	arrayOf(5, 6, 7, 8, 9)
 		.permutations()
 		.map { amplify(program, it) to it.clone() }
 		.maxBy { it.first }!!
 		.let { println("${it.first} with [${it.second.contentToString()}") }
 }
 
-fun amplify(program: Program, phaseSettings: Array<Int>): Int {
-	var lastOutput: Int? = null
-	for (i in phaseSettings) {
-		val current = Program(program)
-		current.input.add(i)
-		current.input.add(lastOutput ?: 0)
-		execute(current)
-		lastOutput = current.output.last()
-	}
-	return lastOutput!!
-}
+fun amplify(originalProgram: Program, phaseSettings: Array<Int>): Int {
+	val programs = phaseSettings
+		.map { phaseSetting ->
+			Program(originalProgram).also {
+				it.input.add(phaseSetting)
+			}
+		}
 
-fun execute(program: Program) {
-	do {
-		val instruction = Instruction.parse(program.poll())
-		val done = instruction(program)
-	} while (!done)
+	while (true) {
+		val index = programs.indexOfFirst {
+			it.state != Program.State.HALTED && it.state != Program.State.WAITING_FOR_INPUT
+		}
+		if (index == -1) {
+			break
+		}
+
+		val previousIndex = (index - 1).let { if (it >= 0) it else 4 }
+
+		val program = programs[index]
+		val previous = programs[previousIndex]
+		while (previous.output.size > 0) {
+			program.input.add(previous.output.poll())
+		}
+
+		program.execute()
+	}
+
+	return programs.first { it.output.size > 0 }.output.poll()
 }
