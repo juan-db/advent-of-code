@@ -152,7 +152,15 @@ class Program(collection: Collection<Int>) : ArrayList<Int>(collection) {
 	var ip = 0
 
 	val input = LinkedList<Int>()
-	val output = LinkedList<Int>()
+	val output = object : LinkedList<Int>() {
+		override fun add(element: Int): Boolean {
+			largestOutput = max(largestOutput ?: 0, element)
+			return super.add(element)
+		}
+	}
+
+	var largestOutput: Int? = null
+		private set
 
 	private var instruction: Instruction? = null
 
@@ -246,7 +254,6 @@ fun amplify(originalProgram: Program, phaseSettings: Array<Int>): Int {
 	programs[0].input.push(0)
 
 	var i = 0
-	var largestOutput = 0
 	while (programs.any { it.state != Program.State.HALTED }) {
 		val program = programs[i]
 		val previous = programs[(i - 1).let { if (it >= 0) it else 4 }]
@@ -255,8 +262,7 @@ fun amplify(originalProgram: Program, phaseSettings: Array<Int>): Int {
 		}
 		program.execute()
 		i = (i + 1).let { if (it < programs.size) it else 0 }
-		largestOutput = max(largestOutput, programs.last().output.max() ?: 0)
 	}
 
-	return largestOutput
+	return programs.last().largestOutput ?: error("Last amp never output anything.")
 }
