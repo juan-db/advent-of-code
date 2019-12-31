@@ -49,7 +49,7 @@ data class Instruction(
 			false
 		}),
 		PRINT(4, 1, { program, args ->
-			program.output.push(args[0].value)
+			program.output.add(args[0].value)
 			false
 		}),
 		JUMP_IF_TRUE(5, 2, { program, args ->
