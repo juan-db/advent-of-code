@@ -251,7 +251,7 @@ fun amplify(originalProgram: Program, phaseSettings: Array<Int>): Int {
 				it.input.add(phaseSetting)
 			}
 		}
-	programs[0].input.push(0)
+	programs[0].input.add(0)
 
 	var i = 0
 	while (programs.any { it.state != Program.State.HALTED }) {
