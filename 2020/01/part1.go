@@ -9,14 +9,14 @@ import (
 
 func main() {
 	if len(os.Args) < 2 {
-		fmt.Println("usage: go run ./part1 <input file name>")
+		fmt.Println("usage: go run ./part1.go <input file name>")
 		os.Exit(1)
 	}
 
 	inputFile, err := os.Open(os.Args[1])
 	if err != nil {
 		fmt.Println(err.Error())
-		fmt.Println("usage: go run ./part1 <input file name>")
+		fmt.Println("usage: go run ./part1.go <input file name>")
 		os.Exit(1)
 	}
 
