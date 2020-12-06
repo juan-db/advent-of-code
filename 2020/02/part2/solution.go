@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 )
@@ -36,17 +35,7 @@ func isValid(pass string, policy Policy) bool {
 }
 
 func main() {
-	if len(os.Args) < 2 {
-		fmt.Println("usage: go run ./solution.go <input file name>")
-		os.Exit(1)
-	}
-
-	inputFile, err := os.Open(os.Args[1])
-	if err != nil {
-		fmt.Println(err.Error())
-		fmt.Println("usage: go run ./solution.go <input file name>")
-		os.Exit(1)
-	}
+	inputFile := OpenInputFile()
 
 	valid := 0
 	scanner := bufio.NewScanner(inputFile)

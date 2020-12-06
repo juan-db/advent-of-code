@@ -3,25 +3,14 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"os"
 	"strconv"
 )
 
 func main() {
-	if len(os.Args) < 2 {
-		fmt.Println("usage: go run ./part1.go <input file name>")
-		os.Exit(1)
-	}
-
-	inputFile, err := os.Open(os.Args[1])
-	if err != nil {
-		fmt.Println(err.Error())
-		fmt.Println("usage: go run ./part1.go <input file name>")
-		os.Exit(1)
-	}
+	file := OpenInputFile()
 
 	expenses := make(map[int]bool)
-	scanner := bufio.NewScanner(inputFile)
+	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		num, _ := strconv.Atoi(scanner.Text())
 
