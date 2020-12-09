@@ -1,4 +1,4 @@
-module 07-01
+module part1
 
 go 1.15
 
